@@ -2,11 +2,6 @@
 name = "fchat"
 version = "0.1.0"
 authors = ["Effnote <effnote@gmail.com>"]
-build = "build.rs"
-
-[features]
-default = ["serde_codegen"]
-nightly = ["serde_macros"]
 
 [lib]
 
@@ -16,11 +11,7 @@ name = "simple_client"
 [dependencies]
 serde = "*"
 serde_json = "*"
-serde_macros = { version = "*", optional = true }
+serde_macros = "*"
 hyper = "*"
 url = "*"
 websocket = "~0.12.2"
-
-[build-dependencies]
-serde_codegen = { version = "*", optional = true }
-syntex = "*"

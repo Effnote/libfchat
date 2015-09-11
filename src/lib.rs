@@ -1,15 +1,13 @@
-#![cfg_attr(feature = "serde_macros", feature(custom_derive, plugin))]
-#![cfg_attr(feature = "serde_macros", plugin(serde_macros))]
+#![feature(custom_derive, plugin)]
+#![plugin(serde_macros)]
 
 extern crate serde;
 extern crate serde_json;
+extern crate hyper;
+extern crate url;
 
-#[cfg(feature = "serde_macros")]
-include!("lib.rs.in");
+pub use ticket::Ticket;
+pub use fchat::FChat;
 
-#[cfg(not(feature = "serde_macros"))]
-include!(concat!(env!("OUT_DIR"), "/main.rs"));
-
-#[test]
-fn it_works() {
-}
+pub mod ticket;
+pub mod fchat;
