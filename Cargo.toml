@@ -5,9 +5,6 @@ authors = ["Effnote <effnote@gmail.com>"]
 
 [lib]
 
-[[bin]]
-name = "simple_client"
-
 [dependencies]
 serde = "*"
 serde_json = "*"
