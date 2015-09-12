@@ -12,3 +12,5 @@ pub use fchat::{FChat, Server};
 
 pub mod ticket;
 pub mod fchat;
+pub mod message;
+pub mod enums;
