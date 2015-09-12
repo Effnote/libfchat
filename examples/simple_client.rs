@@ -2,7 +2,7 @@ extern crate fchat;
 
 use std::io;
 use std::io::prelude::*;
-use fchat::{Ticket, FChat};
+use fchat::{Ticket, FChat, Server};
 
 fn read_line() -> io::Result<String> {
     try!(io::stdout().flush());
@@ -47,4 +47,6 @@ fn main() {
         }
         println!("Not a valid number: {}", input);
     }
+    let mut chat = FChat::connect(Server::Debug);
+    chat.identify(&ticket, &character, "Simple Test Client 0.0.1");
 }
