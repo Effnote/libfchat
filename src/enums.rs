@@ -82,3 +82,6 @@ make_enum!(enum TypingStatus;
           Clear: "clear",
           Paused: "paused",
           Typing: "typing";);
+
+make_enum!(enum SfcAction;
+          Report: "report";);

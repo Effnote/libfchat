@@ -129,7 +129,7 @@ pub enum Message<'a> {
     },
     SFC {
         // action is always "report"
-        action: &'a str,
+        action: SfcAction,
         report: &'a str,
         character: &'a str,
     },
