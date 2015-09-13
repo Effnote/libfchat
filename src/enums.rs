@@ -85,3 +85,32 @@ make_enum!(enum TypingStatus;
 
 make_enum!(enum SfcAction;
           Report: "report";);
+
+#[derive(Debug)]
+pub enum IgnEnum<'a> {
+    Add { character: &'a str },
+    Delete { character: &'a str },
+    Notify { character: &'a str },
+    List,
+}
+
+impl<'a> serde::Serialize for IgnEnum<'a> {
+    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+        where S: serde::Serializer
+    {
+        use serde::ser::impls::MapIteratorVisitor;
+        use self::IgnEnum::*;
+        let values = match *self {
+            Add { character } => vec![("action", "add"), ("character", character)],
+            Delete { character } => vec![("action", "delete"), ("character", character)],
+            Notify { character } => vec![("action", "notify"), ("character", character)],
+            List => vec![("action", "list")],
+        };
+        serializer.visit_map(
+            MapIteratorVisitor::new(
+                values.iter().cloned(),
+                Some(values.len())
+            )
+        )
+    }
+}

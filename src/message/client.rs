@@ -83,7 +83,7 @@ pub enum Message<'a> {
         cname: &'a str,
         version: &'a str,
     },
-    // TODO: Handle IGN
+    IGN(IgnEnum<'a>),
     JCH {
         channel: &'a str,
     },
