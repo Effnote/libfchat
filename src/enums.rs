@@ -1,7 +1,8 @@
 use serde;
 
 macro_rules! make_enum { 
-    (enum $name: ident ; $($variant: ident : $string: expr),+ ; $($variant2: ident),* ) => { 
+    (enum $name: ident ; $($variant: ident : $string: expr),+ ; $($variant2: ident),* ) => {
+        #[derive(Debug)]
         pub enum $name {
             $( $variant, )* 
             $( $variant2, )* 

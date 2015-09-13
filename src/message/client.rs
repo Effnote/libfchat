@@ -1,5 +1,6 @@
 use enums::*;
 
+#[derive(Serialize, Debug)]
 pub enum Message<'a> {
     ACB {
         character: &'a str,
@@ -66,7 +67,6 @@ pub enum Message<'a> {
     DOP {
         character: &'a str,
     },
-    // Test this one
     FKS {
         kinks: &'a [i32],
         genders: &'a [Gender],
@@ -153,7 +153,23 @@ pub enum Message<'a> {
 }
 
 impl<'a> Message<'a> {
+    // Serialize the Message into the final format.
+    // Theoretically, this method should never panic, unless
+    // breaking changes in serde happen.
     pub fn to_string(&self) -> String {
-        unimplemented!();
+        use serde_json;
+
+        let value = serde_json::to_value(self);
+        let object = value.as_object()
+            .expect("Error: serialization: expected Value::Object, got something else");
+        if let Some((variant, value)) = object.into_iter().nth(0) {
+            if value.is_object() {
+                return format!("{} {:?}\n", variant, value);
+            } else {
+                return format!("{}\n", variant);
+            }
+        } else {
+            panic!("Error: serialization: Empty top object.");
+        }
     }
 }
