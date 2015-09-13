@@ -173,3 +173,31 @@ impl<'a> Message<'a> {
         }
     }
 }
+
+#[test]
+fn fks_serialize() {
+    use enums::Gender::*;
+    use enums::Orientation::*;
+    use enums::Language::*;
+    use enums::FurryPref::*;
+    use enums::Role;
+
+    let string = Message::FKS {
+        kinks: &[51, 425],
+        genders: &[MaleHerm, Cuntboy, Female],
+        orientations: &[Straight, Bisexual, BiFemPref],
+        languages: &[Dutch, French, Other],
+        furryprefs: &[JustHuman, JustFurry],
+        roles: &[Role::AlwaysDom, Role::AlwaysSub, Role::Switch],
+    }.to_string();
+
+    assert_eq!(
+        string,
+        "FKS {\"furryprefs\":[\"No furry characters, just humans\"\
+        ,\"No humans, just furry characters\"]\
+        ,\"genders\":[\"Male-Herm\",\"Cunt-boy\",\"Female\"],\
+        \"kinks\":[51,425],\
+        \"languages\":[\"Dutch\",\"French\",\"Other\"],\
+        \"orientations\":[\"Straight\",\"Bisexual\",\"Bi - female preference\"],\
+        \"roles\":[\"Always dominant\",\"Always submissive\",\"Switch\"]}\n");
+}
