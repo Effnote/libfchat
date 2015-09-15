@@ -76,12 +76,12 @@ pub enum Message<'a> {
         roles: &'a [Role],
     },
     IDN {
-        method: &'a str,
+        method: IdnMethod,
         account: &'a str,
         ticket: &'a str,
         character: &'a str,
         cname: &'a str,
-        version: &'a str,
+        cversion: &'a str,
     },
     IGN(IgnEnum<'a>),
     JCH {
@@ -164,9 +164,9 @@ impl<'a> Message<'a> {
             .expect("Error: serialization: expected Value::Object, got something else");
         if let Some((variant, value)) = object.into_iter().nth(0) {
             if value.is_object() {
-                return format!("{} {:?}\n", variant, value);
+                return format!("{} {:?}", variant, value);
             } else {
-                return format!("{}\n", variant);
+                return format!("{}", variant);
             }
         } else {
             panic!("Error: serialization: Empty top object.");

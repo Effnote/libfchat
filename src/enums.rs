@@ -87,6 +87,9 @@ make_enum!(enum TypingStatus;
 make_enum!(enum SfcAction;
           Report: "report";);
 
+make_enum!(enum IdnMethod;
+          Ticket: "ticket";);
+
 #[derive(Debug)]
 pub enum IgnEnum<'a> {
     Add { character: &'a str },
