@@ -28,8 +28,8 @@ fn main() {
     let username = read_line().unwrap();
     print!("Password: ");
     let password = read_line().unwrap();
-    let ticket = Ticket::request(&username, &password);
-    let mut characters = ticket.characters();
+    let ticket = Ticket::request(&username, &password).unwrap();
+    let characters = ticket.characters();
     println!("Characters:");
     for (i, character) in characters.iter().enumerate() {
         println!("({}) {}", i, character);
@@ -40,13 +40,13 @@ fn main() {
         let input = read_line().unwrap();
         if let Ok(n) = input.parse::<usize>() {
             if n < characters.len() {
-                character = characters.swap_remove(n);
+                character = characters[n].clone();
                 drop(characters);
                 break;
             }
         }
         println!("Not a valid number: {}", input);
     }
-    let mut chat = FChat::connect(Server::Debug);
-    chat.identify(&ticket, &character, "Simple Test Client 0.0.1");
+    let mut chat = FChat::connect(Server::Debug).unwrap();
+    chat.identify(&ticket, &character, "Simple Test Client", "0.0.1");
 }
