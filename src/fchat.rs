@@ -57,7 +57,6 @@ impl FChat {
     }
 
     pub fn send_raw(&mut self, mut message: String) -> Result<(), SendError<String>> {
-        message.push('\n');
         self.sender.send(message)
     }
 }
