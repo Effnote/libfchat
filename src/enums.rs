@@ -1,27 +1,28 @@
 use serde;
 
-macro_rules! make_enum { 
+macro_rules! make_enum {
     (enum $name: ident ; $($variant: ident : $string: expr),+ ; $($variant2: ident),* ) => {
         #[derive(Debug)]
         pub enum $name {
-            $( $variant, )* 
-            $( $variant2, )* 
-        } 
-     
+            $( $variant, )*
+            $( $variant2, )*
+        }
+
         impl serde::Serialize for $name {
-            fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error> 
-                where S: serde::Serializer 
-            { 
-                serializer.visit_str( 
-                    match *self { 
-                        $($name::$variant => $string,)* 
-                        $($name::$variant2 => stringify!($variant2),)* 
-                    } 
-                ) 
-            } 
-        } 
-    } 
-} 
+            fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+                where S: serde::Serializer
+            {
+                serializer.visit_str(
+                    match *self {
+                        $($name::$variant => $string,)*
+                        $($name::$variant2 => stringify!($variant2),)*
+                    }
+                )
+            }
+        }
+
+    }
+}
 
 make_enum!(enum Gender;
           MaleHerm: "Male-Herm",
@@ -37,7 +38,7 @@ make_enum!(enum Orientation;
 make_enum!(enum Language;
           // Due to macro_rules! limitations,
           // at least one element must have a string specified
-          Other: "Other"; 
+          Other: "Other";
           Dutch, English, French, Spanish, German, Russian, Chinese, Japanese,
           Portugese, Korean, Arabic, Italian, Swedish);
 
