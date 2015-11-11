@@ -1,4 +1,4 @@
-#![feature(custom_derive, plugin)]
+#![feature(custom_derive, custom_attribute, plugin)]
 #![plugin(serde_macros)]
 
 extern crate serde;
