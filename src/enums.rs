@@ -12,7 +12,7 @@ macro_rules! make_enum {
             fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
                 where S: serde::Serializer
             {
-                serializer.visit_str(
+                serializer.serialize_str(
                     match *self {
                         $($name::$variant => $string,)*
                         $($name::$variant2 => stringify!($variant2),)*
@@ -21,6 +21,18 @@ macro_rules! make_enum {
             }
         }
 
+        impl serde::Deserialize for $name {
+            fn deserialize<D>(deserializer: &mut D) -> Result<$name, D::Error>
+                where D: serde::Deserializer
+            {
+                let string = try!(String::deserialize(deserializer));
+                Ok(match &*string {
+                        $($string => $name::$variant,)*
+                        $(stringify!($variant2) => $name::$variant2,)*
+                        _ => return Err(serde::de::Error::invalid_value(&*string))
+                })
+            }
+        }
     }
 }
 
@@ -111,7 +123,7 @@ impl<'a> serde::Serialize for IgnEnum<'a> {
             Notify { character } => vec![("action", "notify"), ("character", character)],
             List => vec![("action", "list")],
         };
-        serializer.visit_map(
+        serializer.serialize_map(
             MapIteratorVisitor::new(
                 values.iter().cloned(),
                 Some(values.len())

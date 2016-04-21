@@ -1,11 +1,12 @@
 use ticket::Ticket;
 use message::client;
+use message::server;
 use enums;
 
-use url;
 use url::{Url, ParseResult};
-use websocket;
-use std::sync::mpsc::{Sender, Receiver, channel, SendError};
+use websocket as ws;
+use websocket::{Sender, Receiver};
+use websocket::result::WebSocketResult as WsResult;
 
 /// Which F-chat server will be connected to.
 pub enum Server {
@@ -15,7 +16,7 @@ pub enum Server {
 }
 
 impl Server {
-    fn url(&self) -> ParseResult<Url> {
+    pub fn url(&self) -> ParseResult<Url> {
         let string = {
             use self::Server::*;
             match *self {
@@ -27,24 +28,29 @@ impl Server {
     }
 }
 
+pub type ClientSender = ws::client::Sender<ws::WebSocketStream>;
+pub type ClientReceiver = ws::client::Receiver<ws::WebSocketStream>;
+
 pub struct FChat {
-    sender: Sender<String>,
-    receiver: Receiver<String>,
-    connected: bool,
+    pub sender: ClientSender,
+    pub receiver: ClientReceiver,
 }
 
 impl FChat {
     pub fn connect(server: Server) -> Result<FChat, Box<::std::error::Error>> {
-        let (in_tx, in_rx) = channel();
-        let (out_tx, out_rx) = channel();
+        let url = try!(server.url());
+        let request = try!(ws::Client::connect(url));
+        let response = try!(request.send());
+        try!(response.validate());
+        let (sender, receiver) = response.begin().split();
+
         Ok(FChat {
-            sender: out_tx,
-            receiver: in_rx,
-            connected: true
+            sender: sender,
+            receiver: receiver,
         })
     }
 
-    pub fn identify(&mut self, ticket: &Ticket, character: &str, client_name: &str, client_version: &str) {
+    pub fn identify(&mut self, ticket: &Ticket, character: &str, client_name: &str, client_version: &str) -> ws::result::WebSocketResult<()> {
         let idn = client::Message::IDN {
             method: enums::IdnMethod::Ticket,
             ticket: ticket.ticket(),
@@ -53,10 +59,19 @@ impl FChat {
             cname: client_name,
             cversion: client_version,
         };
-        self.send_raw(idn.to_string());
+        try!(self.send_raw(&idn.to_string()));
+        Ok(())
     }
 
-    pub fn send_raw(&mut self, mut message: String) -> Result<(), SendError<String>> {
-        self.sender.send(message)
+    pub fn send_raw(&mut self, message: &str) -> ws::result::WebSocketResult<()> {
+        let message = ws::Message::text(message);
+        self.sender.send_message(&message)
+    }
+
+    pub fn incoming_messages<'a>(&'a mut self) -> Box<Iterator<Item = WsResult<Result<server::Message, server::Error>>> + 'a> {
+        fn to_message(data: ws::Message) -> Result<server::Message, server::Error> {
+            server::Message::from_slice(&data.payload)
+        }
+        Box::new(self.receiver.incoming_messages().map(|x| x.map(to_message)))
     }
 }

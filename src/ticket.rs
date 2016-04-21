@@ -48,7 +48,7 @@ pub struct Ticket {
 impl Ticket {
     pub fn request(username: &str, password: &str) -> Result<Ticket, Error> {
 
-        let mut client = hyper::Client::new();
+        let client = hyper::Client::new();
         let mut body = "account=".to_string();
 
         utf8_percent_encode_to(username, FORM_URLENCODED_ENCODE_SET, &mut body);

@@ -1,4 +1,5 @@
 extern crate fchat;
+extern crate websocket as ws;
 
 use std::io;
 use std::io::prelude::*;
@@ -49,4 +50,7 @@ fn main() {
     }
     let mut chat = FChat::connect(Server::Debug).unwrap();
     chat.identify(&ticket, &character, "Simple Test Client", "0.0.1");
+    for message in chat.incoming_messages() {
+        println!("{:?}", message.unwrap().unwrap());
+    }
 }

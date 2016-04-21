@@ -96,6 +96,10 @@ pub enum Message<'a> {
     LCH {
         channel: &'a str,
     },
+    LRP {
+        channel: &'a str,
+        message: &'a str,
+    },
     MSG {
         channel: &'a str,
         message: &'a str,
