@@ -6,9 +6,9 @@ authors = ["Effnote <effnote@gmail.com>"]
 [lib]
 
 [dependencies]
-serde = "*"
-serde_json = "*"
-serde_macros = "*"
-hyper = "*"
-url = "*"
-websocket = "~0.16.2"
+serde = "0.8"
+serde_json = "0.8"
+serde_macros = "0.8"
+hyper = "0.9.10"
+url = "1.2.0"
+websocket = "0.17.1"
