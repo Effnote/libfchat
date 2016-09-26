@@ -1,5 +1,5 @@
 use hyper;
-use url::percent_encoding::{utf8_percent_encode_to, FORM_URLENCODED_ENCODE_SET};
+use url::form_urlencoded::Serializer;
 use serde_json;
 use std::io::Read;
 
@@ -49,11 +49,11 @@ impl Ticket {
     pub fn request(username: &str, password: &str) -> Result<Ticket, Error> {
 
         let client = hyper::Client::new();
-        let mut body = "account=".to_string();
 
-        utf8_percent_encode_to(username, FORM_URLENCODED_ENCODE_SET, &mut body);
-        body.push_str("&password=");
-        utf8_percent_encode_to(password, FORM_URLENCODED_ENCODE_SET, &mut body);
+        let body = Serializer::new(String::new())
+            .append_pair("account", username)
+            .append_pair("password", password)
+            .finish();
 
         let mime = try!("application/x-www-form-urlencoded".parse());
 
@@ -69,9 +69,9 @@ impl Ticket {
 
         let json_response: serde_json::Value = try!(serde_json::from_str(&response_string));
 
-        if let Some(error) = json_response.find("error").and_then(|x| x.as_string()) {
+        if let Some(&serde_json::Value::String(ref error)) = json_response.find("error") {
             if error != "" {
-                return Err(Error::Fchat(String::from(error)));
+                return Err(Error::Fchat(error.clone()));
             }
         } else {
             return Err(Error::Fchat(format!("Unexpected JSON response: {:?}", json_response)));
@@ -85,8 +85,8 @@ impl Ticket {
             };
 
         let ticket =
-            if let Some(ticket) = json_response.find("ticket").and_then(|x| x.as_string()) {
-                String::from(ticket)
+            if let Some(&serde_json::Value::String(ref ticket)) = json_response.find("ticket") {
+                ticket.clone()
             } else {
                 return Err(Error::Fchat(String::from(r#"Response didn't contain "ticket""#)))
             };

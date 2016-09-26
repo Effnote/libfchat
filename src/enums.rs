@@ -115,19 +115,32 @@ impl<'a> serde::Serialize for IgnEnum<'a> {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
         where S: serde::Serializer
     {
-        use serde::ser::impls::MapIteratorVisitor;
         use self::IgnEnum::*;
-        let values = match *self {
-            Add { character } => vec![("action", "add"), ("character", character)],
-            Delete { character } => vec![("action", "delete"), ("character", character)],
-            Notify { character } => vec![("action", "notify"), ("character", character)],
-            List => vec![("action", "list")],
+        let mut map_state = try!(serializer.serialize_map(None));
+        match *self {
+            Add { character } => {
+                try!(serializer.serialize_map_key(&mut map_state, "action"));
+                try!(serializer.serialize_map_value(&mut map_state, "add"));
+                try!(serializer.serialize_map_key(&mut map_state, "character"));
+                try!(serializer.serialize_map_value(&mut map_state, character));
+            }
+            Delete { character } => {
+                try!(serializer.serialize_map_key(&mut map_state, "action"));
+                try!(serializer.serialize_map_value(&mut map_state, "delete"));
+                try!(serializer.serialize_map_key(&mut map_state, "character"));
+                try!(serializer.serialize_map_value(&mut map_state, character));
+            }
+            Notify { character } => {
+                try!(serializer.serialize_map_key(&mut map_state, "action"));
+                try!(serializer.serialize_map_value(&mut map_state, "notify"));
+                try!(serializer.serialize_map_key(&mut map_state, "character"));
+                try!(serializer.serialize_map_value(&mut map_state, character));
+            }
+            List => {
+                try!(serializer.serialize_map_key(&mut map_state, "action"));
+                try!(serializer.serialize_map_value(&mut map_state, "list"));
+            }
         };
-        serializer.serialize_map(
-            MapIteratorVisitor::new(
-                values.iter().cloned(),
-                Some(values.len())
-            )
-        )
+        serializer.serialize_map_end(map_state)
     }
 }

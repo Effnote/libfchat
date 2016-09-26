@@ -3,7 +3,8 @@ use message::client;
 use message::server;
 use enums;
 
-use url::{Url, ParseResult};
+use url::{self, Url};
+
 use websocket as ws;
 use websocket::{Sender, Receiver};
 use websocket::result::WebSocketResult as WsResult;
@@ -16,7 +17,7 @@ pub enum Server {
 }
 
 impl Server {
-    pub fn url(&self) -> ParseResult<Url> {
+    pub fn url(&self) -> Result<Url, url::ParseError> {
         let string = {
             use self::Server::*;
             match *self {
