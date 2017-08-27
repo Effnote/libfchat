@@ -1,15 +1,14 @@
-use hyper;
-use url::form_urlencoded::Serializer;
 use serde_json;
+use reqwest;
 use std::io::Read;
 
 #[derive(Debug)]
 pub enum Error {
     StdIo(::std::io::Error),
-    Hyper(hyper::Error),
+    Reqwest(reqwest::Error),
     Serde(serde_json::Error),
     Fchat(String),
-    Other
+    Other,
 }
 
 impl From<::std::io::Error> for Error {
@@ -18,22 +17,15 @@ impl From<::std::io::Error> for Error {
     }
 }
 
-impl From<hyper::Error> for Error {
-    fn from(val: hyper::Error) -> Self {
-        Error::Hyper(val)
+impl From<reqwest::Error> for Error {
+    fn from(val: reqwest::Error) -> Self {
+        Error::Reqwest(val)
     }
 }
 
 impl From<serde_json::Error> for Error {
     fn from(val: serde_json::Error) -> Self {
         Error::Serde(val)
-    }
-}
-
-// Mime from hyper seems to use Result<Mime, ()>
-impl From<()> for Error {
-    fn from(_: ()) -> Self {
-        Error::Other
     }
 }
 
@@ -47,49 +39,42 @@ pub struct Ticket {
 
 impl Ticket {
     pub fn request(username: &str, password: &str) -> Result<Ticket, Error> {
-
-        let client = hyper::Client::new();
-
-        let body = Serializer::new(String::new())
-            .append_pair("account", username)
-            .append_pair("password", password)
-            .finish();
-
-        let mime = try!("application/x-www-form-urlencoded".parse());
-
-        let mut response = try!(
-            client.post("http://www.f-list.net/json/getApiTicket.php")
-            .body(&body)
-            .header(hyper::header::ContentType(mime))
-            .send()
-        );
-
+        let client = reqwest::Client::new()?;
+        let form_contents = [("account", username), ("password", password)];
+        let mut response = client
+            .post("https://www.f-list.net/json/getApiTicket.php")?
+            .form(&form_contents)?
+            .send()?;
         let mut response_string = String::new();
-        try!(response.read_to_string(&mut response_string));
+        response.read_to_string(&mut response_string)?;
 
-        let json_response: serde_json::Value = try!(serde_json::from_str(&response_string));
+        let json_response: serde_json::Value = serde_json::from_str(&response_string)?;
 
-        if let Some(&serde_json::Value::String(ref error)) = json_response.find("error") {
+        if let Some(error) = json_response.get("error").and_then(|x| x.as_str()) {
             if error != "" {
-                return Err(Error::Fchat(error.clone()));
+                return Err(Error::Fchat(String::from(error)));
             }
         } else {
-            return Err(Error::Fchat(format!("Unexpected JSON response: {:?}", json_response)));
+            return Err(Error::Fchat(
+                format!("Unexpected JSON response: {:?}", json_response),
+            ));
         }
 
-        let characters =
-            if let Some(characters) = json_response.find("characters") {
-                try!(serde_json::from_value::<Vec<String>>(characters.clone()))
-            } else {
-                return Err(Error::Fchat(String::from(r#"Response didn't contain "characters""#)))
-            };
+        let characters = if let Some(characters) = json_response.get("characters") {
+            serde_json::from_value::<Vec<String>>(characters.clone())?
+        } else {
+            return Err(Error::Fchat(
+                String::from(r#"Response didn't contain "characters""#),
+            ));
+        };
 
-        let ticket =
-            if let Some(&serde_json::Value::String(ref ticket)) = json_response.find("ticket") {
-                ticket.clone()
-            } else {
-                return Err(Error::Fchat(String::from(r#"Response didn't contain "ticket""#)))
-            };
+        let ticket = if let Some(ticket) = json_response.get("ticket").and_then(|x| x.as_str()) {
+            String::from(ticket)
+        } else {
+            return Err(Error::Fchat(
+                String::from(r#"Response didn't contain "ticket""#),
+            ));
+        };
 
         Ok(Ticket {
             username: String::from(username),
@@ -103,7 +88,7 @@ impl Ticket {
         &self.characters
     }
 
-    pub fn ticket(&self) -> &str {
-        &self.ticket
+    pub fn ticket(&self) -> String {
+        self.ticket.clone()
     }
 }

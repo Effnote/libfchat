@@ -1,6 +1,6 @@
 use enums::*;
 use serde_json as json;
-use std::collections::BTreeMap;
+use std::fmt;
 
 #[derive(Deserialize, Debug)]
 pub struct PublicChannel {
@@ -23,22 +23,14 @@ pub struct UserObject {
 
 #[derive(Deserialize, Debug)]
 pub enum Message {
-    ADL {
-        ops: Vec<String>,
-    },
-    AOP {
-        character: String,
-    },
-    BRO {
-        message: String,
-    },
+    ADL { ops: Vec<String> },
+    AOP { character: String },
+    BRO { message: String },
     CDS {
         channel: String,
         description: String,
     },
-    CHA {
-        channels: Vec<String>,
-    },
+    CHA { channels: Vec<String> },
     CIU {
         sender: String,
         title: String,
@@ -54,87 +46,53 @@ pub enum Message {
         channel: String,
         character: String,
     },
-    COA {
-        character: String,
-        channel: String,
-    },
+    COA { character: String, channel: String },
     COL {
         channel: String,
         oplist: Vec<String>,
     },
-    CON {
-        count: i32,
-    },
-    COR {
-        character: String,
-        channel: String,
-    },
-    CSO {
-        character: String,
-        channel: String,
-    },
+    CON { count: i32 },
+    COR { character: String, channel: String },
+    CSO { character: String, channel: String },
     CTU {
         operator: String,
         channel: String,
         length: i32,
         character: String,
     },
-    DOP {
-        character: String,
-    },
-    ERR {
-        number: i32,
-        message: String,
-    },
+    DOP { character: String },
+    ERR { number: i32, message: String },
     FKS {
         characters: Vec<String>,
         kinks: Vec<i32>,
     },
-    FLN {
-        character: String,
-    },
-    HLO {
-        message: String,
-    },
+    FLN { character: String },
+    HLO { message: String },
     ICH {
         users: Vec<UserObject>,
         channel: String,
         mode: ChannelMode,
     },
-    IDN {
-        character: String,
-    },
+    IDN { character: String },
     JCH {
         channel: String,
         character: UserObject,
         title: String,
     },
     KID(json::Value),
-    LCH {
-        channel: String,
-        character: String,
-    },
-    LIS {
-        characters: Vec<Vec<String>>,
-    },
+    LCH { channel: String, character: String },
+    LIS { characters: Vec<Vec<String>> },
     NLN {
         identity: String,
         gender: Gender,
         status: CharacterStatus,
     },
     IGN(json::Value),
-    FRL {
-        characters: Vec<String>,
-    },
-    ORS {
-        channels: Vec<ORSDetails>,
-    },
+    FRL { characters: Vec<String> },
+    ORS { channels: Vec<ORSDetails> },
     PIN,
     PRD(json::Value),
-    PRI {
-        character: String,
-        message: String,
-    },
+    PRI { character: String, message: String },
     MSG {
         character: String,
         message: String,
@@ -146,13 +104,9 @@ pub enum Message {
         channel: String,
     },
     RLL(json::Value),
-    RMO {
-        mode: ChannelMode,
-        channel: String,
-    },
+    RMO { mode: ChannelMode, channel: String },
     RTB {
-        #[serde(rename = "type")]
-        _type: String,
+        #[serde(rename = "type")] _type: String,
         character: String,
     },
     SFC(json::Value),
@@ -185,41 +139,60 @@ pub enum Message {
 }
 
 #[derive(Debug)]
-pub enum Error {
-    JsonError(json::Error),
-    InvalidMessage
+pub enum ParseError {
+    Json(json::Error),
+    InvalidMessage,
 }
 
-impl ::std::convert::From<json::Error> for Error {
-    fn from(error: json::Error) -> Error {
-        Error::JsonError(error)
+impl ::std::convert::From<json::Error> for ParseError {
+    fn from(error: json::Error) -> ParseError {
+        ParseError::Json(error)
+    }
+}
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::ParseError::*;
+        match *self {
+            Json(ref err) => err.fmt(f),
+            InvalidMessage => "Invalid F-Chat message received.".fmt(f),
+        }
+    }
+}
+
+impl ::std::error::Error for ParseError {
+    fn description(&self) -> &str {
+        "Error parsing F-Chat message."
     }
 }
 
 impl Message {
     // TODO: Find a way to deserialize without allocating a BTreeMap
-    fn deserialize(variant: &[u8], text: &[u8]) -> Result<Self, Error> {
-        let mut map = BTreeMap::new();
+    fn deserialize(variant: &[u8], text: &[u8]) -> Result<Self, ParseError> {
+        let mut map = json::Map::new();
 
-        let variant = try!(
-            String::from_utf8(Vec::from(variant))
-            .map_err(|_| Error::InvalidMessage));
+        let variant =
+            String::from_utf8(Vec::from(variant)).map_err(|_| ParseError::InvalidMessage)?;
 
-        if text != &[] {
-            let data = try!(json::from_slice(text));
+        if text != b"" {
+            let data = json::from_slice(text)?;
             map.insert(variant, data);
         } else {
             map.insert(variant, json::Value::Null);
         }
 
-        Ok(try!(json::from_value(json::Value::Object(map))))
+        Ok(json::from_value(json::Value::Object(map))?)
     }
 
-    pub fn from_slice(message: &[u8]) -> Result<Self, Error> {
+    pub fn from_slice(message: &[u8]) -> Result<Self, ParseError> {
         if message.len() < 3 {
-            Err(Error::InvalidMessage)
+            Err(ParseError::InvalidMessage)
         } else {
-            let text = if message.len() >= 4 { &message[4..] } else { &[] };
+            let text = if message.len() >= 4 {
+                &message[4..]
+            } else {
+                &[]
+            };
             Message::deserialize(&message[..3], text)
         }
     }

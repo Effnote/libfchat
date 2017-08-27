@@ -1,207 +1,110 @@
 use enums::*;
 
 #[derive(Serialize, Debug)]
-pub enum Message<'a> {
-    ACB {
-        character: &'a str,
-    },
-    AOP {
-        character: &'a str,
-    },
-    AWC {
-        character: &'a str,
-    },
-    BRO {
-        message: &'a str,
-    },
-    CBL {
-        channel: &'a str,
-    },
-    CBU {
-        character: &'a str,
-        channel: &'a str,
-    },
-    CCR {
-        channel: &'a str,
-    },
+pub enum Message {
+    ACB { character: String },
+    AOP { character: String },
+    AWC { character: String },
+    BRO { message: String },
+    CBL { channel: String },
+    CBU { character: String, channel: String },
+    CCR { channel: String },
     CDS {
-        channel: &'a str,
-        description: &'a str,
+        channel: String,
+        description: String,
     },
     CHA,
-    CIU {
-        channel: &'a str,
-        character: &'a str,
-    },
-    CKU {
-        channel: &'a str,
-        character: &'a str,
-    },
-    COA {
-        channel: &'a str,
-        character: &'a str,
-    },
-    COL {
-        channel: &'a str,
-    },
-    COR {
-        channel: &'a str,
-        character: &'a str,
-    },
-    CRC {
-        channel: &'a str,
-    },
-    CSO {
-        character: &'a str,
-        channel: &'a str,
-    },
+    CIU { channel: String, character: String },
+    CKU { channel: String, character: String },
+    COA { channel: String, character: String },
+    COL { channel: String },
+    COR { channel: String, character: String },
+    CRC { channel: String },
+    CSO { character: String, channel: String },
     CTU {
-        channel: &'a str,
-        character: &'a str,
-        length: u8
+        channel: String,
+        character: String,
+        length: u8,
     },
-    CUB {
-        character: &'a str,
-        channel: &'a str,
-    },
-    DOP {
-        character: &'a str,
-    },
+    CUB { character: String, channel: String },
+    DOP { character: String },
     FKS {
-        kinks: &'a [i32],
-        genders: &'a [Gender],
-        orientations: &'a [Orientation],
-        languages: &'a [Language],
-        furryprefs: &'a [FurryPref],
-        roles: &'a [Role],
+        kinks: Vec<i32>,
+        genders: Vec<Gender>,
+        orientations: Vec<Orientation>,
+        languages: Vec<Language>,
+        furryprefs: Vec<FurryPref>,
+        roles: Vec<Role>,
     },
     IDN {
         method: IdnMethod,
-        account: &'a str,
-        ticket: &'a str,
-        character: &'a str,
-        cname: &'a str,
-        cversion: &'a str,
+        account: String,
+        ticket: String,
+        character: String,
+        cname: String,
+        cversion: String,
     },
-    IGN(IgnEnum<'a>),
-    JCH {
-        channel: &'a str,
-    },
-    KIK {
-        character: &'a str,
-    },
-    KIN {
-        character: &'a str,
-    },
-    LCH {
-        channel: &'a str,
-    },
-    LRP {
-        channel: &'a str,
-        message: &'a str,
-    },
-    MSG {
-        channel: &'a str,
-        message: &'a str,
-    },
+    IGN(IgnEnum),
+    JCH { channel: String },
+    KIK { character: String },
+    KIN { character: String },
+    LCH { channel: String },
+    LRP { channel: String, message: String },
+    MSG { channel: String, message: String },
     ORS,
     PIN,
-    PRI {
-        recipient: &'a str,
-        message: &'a str,
-    },
-    PRO {
-        character: &'a str,
-    },
-    RLL {
-        channel: &'a str,
-        dice: &'a str,
-    },
-    RLD {
-        save: &'a str,
-    },
-    RMO {
-        channel: &'a str,
-        mode: ChannelMode,
-    },
+    PRI { recipient: String, message: String },
+    PRO { character: String },
+    RLL { channel: String, dice: String },
+    RLD { save: String },
+    RMO { channel: String, mode: ChannelMode },
     RST {
-        channel: &'a str,
+        channel: String,
         status: ChannelStatus,
     },
-    RWD {
-        character: &'a str,
-    },
+    RWD { character: String },
     SFC {
         // action is always "report"
         action: SfcAction,
-        report: &'a str,
-        character: &'a str,
+        report: String,
+        character: String,
     },
     STA {
         status: CharacterStatus,
-        statusmsg: &'a str,
+        statusmsg: String,
     },
     TMO {
-        character: &'a str,
+        character: String,
         time: u32,
-        reason: &'a str,
+        reason: String,
     },
     TPN {
-        character: &'a str,
-        status: TypingStatus
+        character: String,
+        status: TypingStatus,
     },
-    UBN {
-        character: &'a str,
-    },
+    UBN { character: String },
     UPT,
 }
 
-impl<'a> Message<'a> {
+impl Message {
     // Serialize the Message into the final format.
     // Theoretically, this method should never panic, unless
     // breaking changes in serde happen.
     pub fn to_string(&self) -> String {
         use serde_json;
 
-        let value = serde_json::to_value(self);
-        let object = value.as_object()
-            .expect("Error: serialization: expected Value::Object, got something else");
+        let value = serde_json::to_value(self).unwrap();
+        let object = value.as_object().expect(
+            "Error: serialization: expected Value::Object, got something else",
+        );
         if let Some((variant, value)) = object.into_iter().nth(0) {
             if value.is_object() {
-                return format!("{} {:?}", variant, value);
+                return format!("{} {}", variant, value);
             } else {
-                return format!("{}", variant);
+                return variant.clone();
             }
         } else {
             panic!("Error: serialization: Empty top object.");
         }
     }
-}
-
-#[test]
-fn fks_serialize() {
-    use enums::Gender::*;
-    use enums::Orientation::*;
-    use enums::Language::*;
-    use enums::FurryPref::*;
-    use enums::Role;
-
-    let string = Message::FKS {
-        kinks: &[51, 425],
-        genders: &[MaleHerm, Cuntboy, Female],
-        orientations: &[Straight, Bisexual, BiFemPref],
-        languages: &[Dutch, French, Other],
-        furryprefs: &[JustHuman, JustFurry],
-        roles: &[Role::AlwaysDom, Role::AlwaysSub, Role::Switch],
-    }.to_string();
-
-    assert_eq!(
-        string,
-        "FKS {\"furryprefs\":[\"No furry characters, just humans\"\
-        ,\"No humans, just furry characters\"]\
-        ,\"genders\":[\"Male-Herm\",\"Cunt-boy\",\"Female\"],\
-        \"kinks\":[51,425],\
-        \"languages\":[\"Dutch\",\"French\",\"Other\"],\
-        \"orientations\":[\"Straight\",\"Bisexual\",\"Bi - female preference\"],\
-        \"roles\":[\"Always dominant\",\"Always submissive\",\"Switch\"]}\n");
 }

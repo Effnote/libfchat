@@ -1,14 +1,13 @@
-#![feature(custom_derive, custom_attribute, plugin)]
-#![plugin(serde_macros)]
-
+extern crate reqwest;
 extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 extern crate serde_json;
-extern crate hyper;
-extern crate url;
 extern crate websocket;
 
+pub use websocket::futures;
 pub use ticket::Ticket;
-pub use fchat::{FChat, Server};
+pub use fchat::*;
 
 pub mod ticket;
 pub mod fchat;
