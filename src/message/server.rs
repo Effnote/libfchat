@@ -2,26 +2,26 @@ use enums::*;
 use serde_json as json;
 use std::fmt;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct PublicChannel {
     pub name: String,
     pub mode: ChannelMode,
     pub characters: i32,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct ORSDetails {
     pub name: String,
     pub characters: i32,
     pub title: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct UserObject {
     pub identity: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone, PartialEq)]
 pub enum Message {
     ADL { ops: Vec<String> },
     AOP { character: String },

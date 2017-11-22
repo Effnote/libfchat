@@ -2,7 +2,7 @@ use serde;
 
 macro_rules! make_enum {
     (enum $name: ident ; $($variant: ident : $string: expr),+ ; $($variant2: ident),* ) => {
-        #[derive(Debug)]
+        #[derive(Debug, Copy, Clone, PartialEq, Eq)]
         pub enum $name {
             $( $variant, )*
             $( $variant2, )*
@@ -105,7 +105,7 @@ Report: "report";);
 make_enum!(enum IdnMethod;
 Ticket: "ticket";);
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum IgnEnum {
     Add { character: String },
     Delete { character: String },

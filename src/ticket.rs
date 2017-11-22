@@ -29,7 +29,7 @@ impl From<serde_json::Error> for Error {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Ticket {
     pub username: String,
     pub characters: Vec<String>,

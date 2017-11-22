@@ -16,6 +16,7 @@ use websocket::futures::{Future, Sink, Stream};
 use websocket::futures::sink::Send;
 
 /// Which F-chat server will be connected to.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Server {
     Normal,
     Debug,

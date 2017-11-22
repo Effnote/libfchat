@@ -1,6 +1,6 @@
 use enums::*;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone, PartialEq, Eq)]
 pub enum Message {
     ACB { character: String },
     AOP { character: String },
