@@ -104,9 +104,9 @@ where
     let stream = stream
         .map_err(Error::WebSocket)
         .filter_map(move |message| match message {
-            OwnedMessage::Text(ref data) => Some(
-                server::Message::from_slice(data.as_bytes()).map_err(Error::Parse),
-            ),
+            OwnedMessage::Text(ref data) => {
+                Some(server::Message::from_slice(data.as_bytes()).map_err(Error::Parse))
+            }
             OwnedMessage::Binary(ref data) => {
                 Some(server::Message::from_slice(data).map_err(Error::Parse))
             }
