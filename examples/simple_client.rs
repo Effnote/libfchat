@@ -53,7 +53,7 @@ fn main() {
     }
     let mut core = Core::new().unwrap();
     let handle = core.handle();
-    let chat = fchat::connect(Server::Debug, &handle)
+    let chat = fchat::connect(Server::Debug, handle)
         .and_then(|(sink, stream)| {
             (
                 fchat::identify(

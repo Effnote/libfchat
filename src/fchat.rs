@@ -80,12 +80,12 @@ pub type FchatStream = Box<Stream<Item = server::Message, Error = Error>>;
 pub type FchatSink = Box<Sink<SinkItem = client::Message, SinkError = Error>>;
 pub type Connection = (FchatSink, FchatStream);
 
-pub fn connect<'a>(
+pub fn connect(
     server: Server,
-    handle: &'a Handle,
-) -> Box<Future<Item = Connection, Error = Error> + 'a> {
+    handle: Handle,
+) -> Box<Future<Item = Connection, Error = Error>> {
     let url = server.url().expect("Invalid server URL provided");
-    let future_client = websocket::ClientBuilder::from_url(&url).async_connect_secure(None, handle);
+    let future_client = websocket::ClientBuilder::from_url(&url).async_connect_secure(None, &handle);
     Box::new(future_client.map_err(Error::WebSocket).and_then(
         move |(client, _headers)| {
             let (sink, stream) = client.split();
@@ -94,7 +94,7 @@ pub fn connect<'a>(
     ))
 }
 
-fn wrap<A, B>(handle: &Handle, sink: A, stream: B) -> Connection
+fn wrap<A, B>(handle: Handle, sink: A, stream: B) -> Connection
 where
     A: Sink<SinkItem = OwnedMessage, SinkError = WebSocketError> + 'static,
     B: Stream<Item = OwnedMessage, Error = WebSocketError> + 'static,
