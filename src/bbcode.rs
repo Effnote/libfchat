@@ -1,5 +1,3 @@
-use nom;
-
 #[derive(Clone, PartialEq, Debug)]
 pub enum Color {
     Black,

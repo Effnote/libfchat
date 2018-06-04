@@ -4,8 +4,6 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 extern crate websocket;
-#[macro_use]
-extern crate nom;
 
 pub use websocket::futures;
 pub use ticket::Ticket;
