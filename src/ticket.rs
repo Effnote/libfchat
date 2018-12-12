@@ -39,11 +39,11 @@ pub struct Ticket {
 
 impl Ticket {
     pub fn request(username: &str, password: &str) -> Result<Ticket, Error> {
-        let client = reqwest::Client::new()?;
+        let client = reqwest::Client::new();
         let form_contents = [("account", username), ("password", password)];
         let mut response = client
-            .post("https://www.f-list.net/json/getApiTicket.php")?
-            .form(&form_contents)?
+            .post("https://www.f-list.net/json/getApiTicket.php")
+            .form(&form_contents)
             .send()?;
         let mut response_string = String::new();
         response.read_to_string(&mut response_string)?;
