@@ -1,5 +1,5 @@
-use serde_json;
 use reqwest;
+use serde_json;
 use std::io::Read;
 
 #[derive(Debug)]
@@ -55,31 +55,32 @@ impl Ticket {
                 return Err(Error::Fchat(String::from(error)));
             }
         } else {
-            return Err(Error::Fchat(
-                format!("Unexpected JSON response: {:?}", json_response),
-            ));
+            return Err(Error::Fchat(format!(
+                "Unexpected JSON response: {:?}",
+                json_response
+            )));
         }
 
         let characters = if let Some(characters) = json_response.get("characters") {
             serde_json::from_value::<Vec<String>>(characters.clone())?
         } else {
-            return Err(Error::Fchat(
-                String::from(r#"Response didn't contain "characters""#),
-            ));
+            return Err(Error::Fchat(String::from(
+                r#"Response didn't contain "characters""#,
+            )));
         };
 
         let ticket = if let Some(ticket) = json_response.get("ticket").and_then(|x| x.as_str()) {
             String::from(ticket)
         } else {
-            return Err(Error::Fchat(
-                String::from(r#"Response didn't contain "ticket""#),
-            ));
+            return Err(Error::Fchat(String::from(
+                r#"Response didn't contain "ticket""#,
+            )));
         };
 
         Ok(Ticket {
             username: String::from(username),
-            characters: characters,
-            ticket: ticket,
+            characters,
+            ticket,
             json: json_response,
         })
     }

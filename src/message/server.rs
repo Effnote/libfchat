@@ -1,4 +1,4 @@
-use enums::*;
+use crate::enums::*;
 use serde_json as json;
 use std::fmt;
 
@@ -23,14 +23,22 @@ pub struct UserObject {
 
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 pub enum Message {
-    ADL { ops: Vec<String> },
-    AOP { character: String },
-    BRO { message: String },
+    ADL {
+        ops: Vec<String>,
+    },
+    AOP {
+        character: String,
+    },
+    BRO {
+        message: String,
+    },
     CDS {
         channel: String,
         description: String,
     },
-    CHA { channels: Vec<String> },
+    CHA {
+        channels: Vec<String>,
+    },
     CIU {
         sender: String,
         title: String,
@@ -46,53 +54,87 @@ pub enum Message {
         channel: String,
         character: String,
     },
-    COA { character: String, channel: String },
+    COA {
+        character: String,
+        channel: String,
+    },
     COL {
         channel: String,
         oplist: Vec<String>,
     },
-    CON { count: i32 },
-    COR { character: String, channel: String },
-    CSO { character: String, channel: String },
+    CON {
+        count: i32,
+    },
+    COR {
+        character: String,
+        channel: String,
+    },
+    CSO {
+        character: String,
+        channel: String,
+    },
     CTU {
         operator: String,
         channel: String,
         length: i32,
         character: String,
     },
-    DOP { character: String },
-    ERR { number: i32, message: String },
+    DOP {
+        character: String,
+    },
+    ERR {
+        number: i32,
+        message: String,
+    },
     FKS {
         characters: Vec<String>,
         kinks: Vec<i32>,
     },
-    FLN { character: String },
-    HLO { message: String },
+    FLN {
+        character: String,
+    },
+    HLO {
+        message: String,
+    },
     ICH {
         users: Vec<UserObject>,
         channel: String,
         mode: ChannelMode,
     },
-    IDN { character: String },
+    IDN {
+        character: String,
+    },
     JCH {
         channel: String,
         character: UserObject,
         title: String,
     },
     KID(json::Value),
-    LCH { channel: String, character: String },
-    LIS { characters: Vec<Vec<String>> },
+    LCH {
+        channel: String,
+        character: String,
+    },
+    LIS {
+        characters: Vec<Vec<String>>,
+    },
     NLN {
         identity: String,
         gender: Gender,
         status: CharacterStatus,
     },
     IGN(json::Value),
-    FRL { characters: Vec<String> },
-    ORS { channels: Vec<ORSDetails> },
+    FRL {
+        characters: Vec<String>,
+    },
+    ORS {
+        channels: Vec<ORSDetails>,
+    },
     PIN,
     PRD(json::Value),
-    PRI { character: String, message: String },
+    PRI {
+        character: String,
+        message: String,
+    },
     MSG {
         character: String,
         message: String,
@@ -104,9 +146,13 @@ pub enum Message {
         channel: String,
     },
     RLL(json::Value),
-    RMO { mode: ChannelMode, channel: String },
+    RMO {
+        mode: ChannelMode,
+        channel: String,
+    },
     RTB {
-        #[serde(rename = "type")] _type: String,
+        #[serde(rename = "type")]
+        _type: String,
         character: String,
     },
     SFC(json::Value),

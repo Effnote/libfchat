@@ -1,8 +1,5 @@
-extern crate fchat;
-extern crate serde_json;
-
-use fchat::message::client::Message;
 use fchat::enums::*;
+use fchat::message::client::Message;
 
 fn main() {
     println!("{}", serde_json::to_value(Message::PIN).unwrap());
@@ -11,20 +8,23 @@ fn main() {
         serde_json::to_value(Message::MSG {
             channel: String::from("foo"),
             message: String::from("bar"),
-        }).unwrap()
+        })
+        .unwrap()
     );
     println!(
         "{}",
         serde_json::to_value(Message::STA {
             status: CharacterStatus::Online,
             statusmsg: String::from("Yohohoho"),
-        }).unwrap()
+        })
+        .unwrap()
     );
     println!(
         "{}",
         serde_json::to_value(Message::IGN(IgnEnum::Add {
             character: String::from("foo_bar"),
-        })).unwrap()
+        }))
+        .unwrap()
     );
     println!(
         "{}",
@@ -37,20 +37,23 @@ fn main() {
         Message::MSG {
             channel: String::from("foo"),
             message: String::from("bar"),
-        }.to_string()
+        }
+        .to_string()
     );
     println!(
         "{:?}",
         Message::STA {
             status: CharacterStatus::Online,
             statusmsg: String::from("Yohohoho"),
-        }.to_string()
+        }
+        .to_string()
     );
     println!(
         "{:?}",
         Message::IGN(IgnEnum::Add {
             character: String::from("foo_bar"),
-        }).to_string()
+        })
+        .to_string()
     );
     println!("{:?}", Message::IGN(IgnEnum::List).to_string());
 }

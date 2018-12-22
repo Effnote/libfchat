@@ -1,4 +1,4 @@
-use enums::*;
+use crate::enums::*;
 
 #[derive(Serialize, Debug, Clone, PartialEq, Eq)]
 pub enum Message {
@@ -165,7 +165,7 @@ impl Message {
 
         let value = serde_json::to_value(self).unwrap();
         match value {
-            Value::String(variant) => return variant,
+            Value::String(variant) => variant,
             Value::Object(object) => {
                 if let Some((variant, value)) = object.into_iter().nth(0) {
                     return format!("{} {}", variant, value);
@@ -190,9 +190,10 @@ mod tests {
 
     #[test]
     fn ign_serialization() {
-        use enums::IgnEnum;
+        use crate::enums::IgnEnum;
         super::Message::IGN(IgnEnum::Add {
             character: "foo_bar".to_string(),
-        }).to_string();
+        })
+        .to_string();
     }
 }

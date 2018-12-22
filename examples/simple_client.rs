@@ -1,13 +1,8 @@
-extern crate fchat;
-extern crate tokio_core;
-
 use std::io;
 use std::io::prelude::*;
 
-use fchat::{Server, Ticket};
 use fchat::futures::{Future, Stream};
-
-use tokio_core::reactor::Core;
+use fchat::{Server, Ticket};
 
 fn read_line() -> io::Result<String> {
     io::stdout().flush()?;
@@ -51,10 +46,9 @@ fn main() {
         }
         println!("Not a valid number: {}", input);
     }
-    let mut core = Core::new().unwrap();
-    let handle = core.handle();
-    let chat = fchat::connect(Server::Debug, handle)
-        .and_then(|(sink, stream)| {
+    let chat = fchat::connect(&Server::Debug)
+        .and_then(move |(sink, stream)| {
+            let ticket = ticket;
             (
                 fchat::identify(
                     sink,
@@ -66,8 +60,7 @@ fn main() {
                 Ok(stream),
             )
         })
-        .and_then(|(_sink, stream)| {
-            stream.for_each(|message| Ok(println!("{:?}", message)))
-        });
-    core.run(chat).unwrap();
+        .and_then(|(_sink, stream)| stream.for_each(|message| Ok(println!("{:?}", message))))
+        .then(|_| Ok(()));
+    tokio::run(chat);
 }

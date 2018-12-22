@@ -79,11 +79,9 @@ mod tests {
         );
         assert_eq!(
             parse("[b][i]text"),
-            vec![
-                BBCode::Bold(vec![
-                    BBCode::Italics(vec![BBCode::Text(String::from("text"))]),
-                ]),
-            ]
+            vec![BBCode::Bold(vec![BBCode::Italics(vec![BBCode::Text(
+                String::from("text")
+            )]),]),]
         );
     }
 
@@ -91,21 +89,21 @@ mod tests {
     fn subscript() {
         assert_eq!(
             parse("[sub][b]text[/b][/sub]"),
-            vec![
-                BBCode::Subscript(vec![BBCode::Bold(vec![BBCode::Text(String::from("text"))])]),
-            ]
+            vec![BBCode::Subscript(vec![BBCode::Bold(vec![BBCode::Text(
+                String::from("text")
+            )])]),]
         );
         assert_eq!(
             parse("[sub][sub]text[/sub][/sub]"),
-            vec![
-                BBCode::Subscript(vec![BBCode::Text(String::from("[sub]text[/sub]"))]),
-            ]
+            vec![BBCode::Subscript(vec![BBCode::Text(String::from(
+                "[sub]text[/sub]"
+            ))]),]
         );
         assert_eq!(
             parse("[sub][sup]text[/sup][/sub]"),
-            vec![
-                BBCode::Subscript(vec![BBCode::Text(String::from("[sup]text[/sup]"))]),
-            ]
+            vec![BBCode::Subscript(vec![BBCode::Text(String::from(
+                "[sup]text[/sup]"
+            ))]),]
         );
     }
 
@@ -113,21 +111,21 @@ mod tests {
     fn superscript() {
         assert_eq!(
             parse("[sup][b]text[/b][/sup]"),
-            vec![
-                BBCode::Superscript(vec![BBCode::Bold(vec![BBCode::Text(String::from("text"))])]),
-            ]
+            vec![BBCode::Superscript(vec![BBCode::Bold(vec![BBCode::Text(
+                String::from("text")
+            )])]),]
         );
         assert_eq!(
             parse("[sup][sup]text[/sup][/sup]"),
-            vec![
-                BBCode::Superscript(vec![BBCode::Text(String::from("[sub]text[/sub]"))]),
-            ]
+            vec![BBCode::Superscript(vec![BBCode::Text(String::from(
+                "[sub]text[/sub]"
+            ))]),]
         );
         assert_eq!(
             parse("[sup][sub]text[/sub][/sup]"),
-            vec![
-                BBCode::Superscript(vec![BBCode::Text(String::from("[sub]text[/sub]"))]),
-            ]
+            vec![BBCode::Superscript(vec![BBCode::Text(String::from(
+                "[sub]text[/sub]"
+            ))]),]
         );
     }
 
@@ -143,18 +141,17 @@ mod tests {
     fn color() {
         assert_eq!(
             parse("[color=red]red[/color]"),
-            vec![
-                BBCode::Color(Color::Red, vec![BBCode::Text(String::from("red"))]),
-            ]
+            vec![BBCode::Color(
+                Color::Red,
+                vec![BBCode::Text(String::from("red"))]
+            ),]
         );
         assert_eq!(
             parse("[color=red][b]red[/b][/color]"),
-            vec![
-                BBCode::Color(
-                    Color::Red,
-                    vec![BBCode::Bold(vec![BBCode::Text(String::from("red"))])],
-                ),
-            ]
+            vec![BBCode::Color(
+                Color::Red,
+                vec![BBCode::Bold(vec![BBCode::Text(String::from("red"))])],
+            ),]
         );
         assert_eq!(
             parse("[color]bad[/color]"),
@@ -170,30 +167,24 @@ mod tests {
     fn url() {
         assert_eq!(
             parse("[url=https://www.google.com/]Google[/url]"),
-            vec![
-                BBCode::Url {
-                    url: String::from("https://www.google.com/"),
-                    text: String::from("Google"),
-                },
-            ]
+            vec![BBCode::Url {
+                url: String::from("https://www.google.com/"),
+                text: String::from("Google"),
+            },]
         );
         assert_eq!(
             parse("[url]https://www.google.com/[/url]"),
-            vec![
-                BBCode::Url {
-                    url: String::from("https://www.google.com/"),
-                    text: String::from("https://www.google.com/"),
-                },
-            ]
+            vec![BBCode::Url {
+                url: String::from("https://www.google.com/"),
+                text: String::from("https://www.google.com/"),
+            },]
         );
         assert_eq!(
             parse("[url=www.google.com/]Google[/url]"),
-            vec![
-                BBCode::Url {
-                    url: String::from("https://www.google.com/"),
-                    text: String::from("Google"),
-                },
-            ]
+            vec![BBCode::Url {
+                url: String::from("https://www.google.com/"),
+                text: String::from("Google"),
+            },]
         );
     }
 }

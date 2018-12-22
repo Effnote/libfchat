@@ -118,8 +118,8 @@ impl serde::Serialize for IgnEnum {
     where
         S: serde::Serializer,
     {
-        use serde::ser::SerializeMap;
         use self::IgnEnum::*;
+        use serde::ser::SerializeMap;
         let values = match *self {
             Add { ref character } => vec![("action", "add"), ("character", character)],
             Delete { ref character } => vec![("action", "delete"), ("character", character)],
