@@ -27,8 +27,8 @@ impl Server {
         let string = {
             use self::Server::*;
             match *self {
-                Normal => "wss://chat.f-list.net:9799",
-                Debug => "wss://chat.f-list.net:8799",
+                Normal => "wss://chat.f-list.net/chat2",
+                Debug => "wss://chat.f-list.net/chat2",
                 Other(ref string) => &**string,
             }
         };
