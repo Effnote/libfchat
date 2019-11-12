@@ -3,7 +3,6 @@ extern crate serde_derive;
 
 pub use crate::fchat::*;
 pub use crate::ticket::Ticket;
-pub use websocket::futures;
 
 pub mod bbcode;
 pub mod enums;

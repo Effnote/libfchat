@@ -161,7 +161,7 @@ impl Message {
     // Theoretically, this method should never panic, unless
     // breaking changes in serde happen.
     pub fn to_string(&self) -> String {
-        use serde_json::{self, Value};
+        use serde_json::Value;
 
         let value = serde_json::to_value(self).unwrap();
         match value {

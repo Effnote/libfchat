@@ -6,13 +6,10 @@ use crate::ticket::Ticket;
 use std::convert::From;
 use std::fmt;
 
-use tokio::spawn;
-use websocket;
-use websocket::futures::sync::mpsc::channel;
-use websocket::futures::{sink, Future, Sink, Stream};
-use websocket::result::WebSocketError;
-use websocket::url::{self, Url};
-use websocket::OwnedMessage;
+use tokio::prelude::*;
+use tokio::sync::mpsc::channel;
+use tokio_tungstenite as async_ws;
+use tokio_tungstenite::{WebSocketStream, tungstenite as ws};
 
 /// Which F-chat server will be connected to.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -23,7 +20,7 @@ pub enum Server {
 }
 
 impl Server {
-    pub fn url(&self) -> Result<Url, url::ParseError> {
+    pub fn url(&self) -> Result<url::Url, url::ParseError> {
         let string = {
             use self::Server::*;
             match *self {
@@ -32,13 +29,13 @@ impl Server {
                 Other(ref string) => &**string,
             }
         };
-        Url::parse(string)
+        url::Url::parse(string)
     }
 }
 
 #[derive(Debug)]
 pub enum Error {
-    WebSocket(WebSocketError),
+    WebSocket(ws::Error),
     Parse(server::ParseError),
     Channel,
 }
@@ -69,36 +66,30 @@ impl From<server::ParseError> for Error {
     }
 }
 
-impl From<WebSocketError> for Error {
-    fn from(error: WebSocketError) -> Self {
+impl From<ws::Error> for Error {
+    fn from(error: ws::Error) -> Self {
         Error::WebSocket(error)
     }
 }
 
-pub type FchatStream = Box<Stream<Item = server::Message, Error = Error> + Send>;
-pub type FchatSink = Box<Sink<SinkItem = client::Message, SinkError = Error> + Send>;
+pub type FchatStream = Box<dyn Stream<Item = server::Message> + Send>;
+pub type FchatSink = Box<dyn Sink<client::Message, Error = Error> + Send>;
 pub type Connection = (FchatSink, FchatStream);
 
-pub fn connect(server: &Server) -> impl Future<Item = Connection, Error = Error> {
+pub async fn connect(server: &Server) -> Result<Connection, Error> {
     let url = server.url().expect("Invalid server URL provided");
-    let future_client = websocket::ClientBuilder::from_url(&url).async_connect_secure(None);
-    future_client
-        .map_err(Error::WebSocket)
-        .and_then(move |(client, _headers)| {
-            let (sink, stream) = client.split();
-            Ok(wrap(sink, stream))
-        })
+    let (connection, _response) = async_ws::connect_async(url).await?;
+    Ok(wrap(connection))
 }
 
-fn wrap<A, B>(sink: A, stream: B) -> Connection
+fn wrap<S>(stream: WebSocketStream<S>) -> Connection
 where
-    A: Sink<SinkItem = OwnedMessage, SinkError = WebSocketError> + Send + 'static,
-    B: Stream<Item = OwnedMessage, Error = WebSocketError> + Send + 'static,
+    S: AsyncWrite + AsyncRead + Unpin
 {
+    let (sink, stream) = stream.split();
     let (tx, rx) = channel(10);
     let mut tx_clone = Some(tx.clone());
     let stream = stream
-        .map_err(Error::WebSocket)
         .filter_map(move |message| match message {
             OwnedMessage::Text(ref data) => {
                 Some(server::Message::from_slice(data.as_bytes()).map_err(Error::Parse))
@@ -115,22 +106,22 @@ where
             _ => None,
         })
         .and_then(|x| x);
-    spawn(sink.sink_map_err(|_| ()).send_all(rx).map(|_| ()));
+    tokio::spawn(sink.sink_map_err(|_| ()).send_all(rx).map(|_| ()));
     let tx = tx
         .sink_map_err(|_| Error::Channel)
         .with(|message: client::Message| Ok(OwnedMessage::Text(message.to_string())));
     (Box::new(tx), Box::new(stream))
 }
 
-pub fn identify<S>(
+pub async fn identify<S>(
     sink: S,
     ticket: &Ticket,
     character: String,
     client_name: String,
     client_version: String,
-) -> sink::Send<S>
+)
 where
-    S: Sink<SinkItem = client::Message, SinkError = Error>,
+    S: Sink<client::Message, Error = Error> + Unpin,
 {
     let idn = client::Message::IDN {
         method: enums::IdnMethod::Ticket,
@@ -140,5 +131,5 @@ where
         cname: client_name,
         cversion: client_version,
     };
-    sink.send(idn)
+    sink.send(idn).await;
 }
