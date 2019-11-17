@@ -1,8 +1,7 @@
 use std::io;
 use std::io::prelude::*;
 
-use fchat::futures::{Future, Stream};
-use fchat::{Server, Ticket};
+use fchat::futures::prelude::*;
 
 fn read_line() -> io::Result<String> {
     io::stdout().flush()?;
@@ -28,7 +27,7 @@ fn main() {
     let username = read_line().unwrap();
     print!("Password: ");
     let password = read_line().unwrap();
-    let ticket = Ticket::request(&username, &password).unwrap();
+    let ticket = fchat::Ticket::request(&username, &password).unwrap();
     let characters = ticket.characters();
     println!("Characters:");
     for (i, character) in characters.iter().enumerate() {
@@ -46,21 +45,25 @@ fn main() {
         }
         println!("Not a valid number: {}", input);
     }
-    let chat = fchat::connect(&Server::Debug)
-        .and_then(move |(sink, stream)| {
-            let ticket = ticket;
-            (
-                fchat::identify(
-                    sink,
-                    &ticket,
-                    character,
-                    "Simple Test Client".to_owned(),
-                    "0.0.1".to_owned(),
-                ),
-                Ok(stream),
+    let chat = async {
+        let mut connection = fchat::Connection::connect(&fchat::Server::Normal).await?;
+        connection
+            .identify(
+                &ticket,
+                character,
+                String::from("Simple Test Client"),
+                String::from("0.0.1"),
             )
-        })
-        .and_then(|(_sink, stream)| stream.for_each(|message| Ok(println!("{:?}", message))))
-        .then(|_| Ok(()));
-    tokio::run(chat);
+            .await?;
+        connection
+            .for_each(|message| {
+                async move {
+                    println!("{:?}", message);
+                }
+            })
+            .await;
+        Ok::<(), fchat::Error>(())
+    };
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+    runtime.block_on(chat).unwrap();
 }

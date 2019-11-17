@@ -1,11 +1,16 @@
 #[macro_use]
 extern crate serde_derive;
 
-pub use crate::fchat::*;
+pub use crate::connection::Connection;
+pub use crate::error::Error;
+pub use crate::server::Server;
 pub use crate::ticket::Ticket;
+pub use futures;
 
 pub mod bbcode;
+pub mod connection;
 pub mod enums;
-pub mod fchat;
+mod error;
 pub mod message;
+mod server;
 pub mod ticket;
