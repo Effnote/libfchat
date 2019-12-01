@@ -5,17 +5,17 @@ version = "0.2.0"
 edition = "2018"
 
 [dependencies]
-#reqwest = "0.9.22"
-serde = "1.0.102"
-serde_derive = "1.0.102"
-serde_json = "1.0.41"
+serde = "1.0.103"
+serde_derive = "1.0.103"
+serde_json = "1.0.42"
 url = "2.1.0"
-tokio = "0.2.0-alpha.6"
+tokio = "0.2.2"
 futures = "0.3.1"
 reqwest = "0.9.22"
 
 [dependencies.tokio-tungstenite]
 git = "https://github.com/dbcfd/tokio-tungstenite"
-branch = "tokio2"
+branch = "tokio2-released"
+features = ["connect", "tls"]
 
 [lib]

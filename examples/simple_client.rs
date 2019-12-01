@@ -64,6 +64,6 @@ fn main() {
             .await;
         Ok::<(), fchat::Error>(())
     };
-    let runtime = tokio::runtime::Runtime::new().unwrap();
+    let mut runtime = tokio::runtime::Runtime::new().unwrap();
     runtime.block_on(chat).unwrap();
 }
