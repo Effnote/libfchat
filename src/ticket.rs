@@ -1,6 +1,5 @@
 use reqwest;
 use serde_json;
-use std::io::Read;
 
 #[derive(Debug)]
 pub enum Error {
@@ -38,17 +37,15 @@ pub struct Ticket {
 }
 
 impl Ticket {
-    pub fn request(username: &str, password: &str) -> Result<Ticket, Error> {
+    pub async fn request(username: &str, password: &str) -> Result<Ticket, Error> {
         let client = reqwest::Client::new();
         let form_contents = [("account", username), ("password", password)];
-        let mut response = client
+        let response = client
             .post("https://www.f-list.net/json/getApiTicket.php")
             .form(&form_contents)
-            .send()?;
-        let mut response_string = String::new();
-        response.read_to_string(&mut response_string)?;
-
-        let json_response: serde_json::Value = serde_json::from_str(&response_string)?;
+            .send()
+            .await?;
+        let json_response: serde_json::Value = response.json().await?;
 
         if let Some(error) = json_response.get("error").and_then(|x| x.as_str()) {
             if error != "" {

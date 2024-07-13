@@ -62,8 +62,8 @@ impl Sink<client::Message> for Connection {
 
 impl Connection {
     pub async fn connect(server: &Server) -> Result<Connection, Error> {
-        let url = server.url().expect("Invalid server URL provided");
-        let (connection, _response) = async_ws::connect_async(url).await?;
+        let uri = server.uri().expect("Invalid server URL provided");
+        let (connection, _response) = async_ws::connect_async(uri).await?;
         Ok(Connection(connection))
     }
 

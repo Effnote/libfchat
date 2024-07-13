@@ -22,12 +22,13 @@ fn read_line() -> io::Result<String> {
     Ok(string)
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     print!("Username: ");
     let username = read_line().unwrap();
     print!("Password: ");
     let password = read_line().unwrap();
-    let ticket = fchat::Ticket::request(&username, &password).unwrap();
+    let ticket = fchat::Ticket::request(&username, &password).await.unwrap();
     let characters = ticket.characters();
     println!("Characters:");
     for (i, character) in characters.iter().enumerate() {
@@ -56,14 +57,11 @@ fn main() {
             )
             .await?;
         connection
-            .for_each(|message| {
-                async move {
-                    println!("{:?}", message);
-                }
+            .for_each(|message| async move {
+                println!("{:?}", message);
             })
             .await;
         Ok::<(), fchat::Error>(())
     };
-    let mut runtime = tokio::runtime::Runtime::new().unwrap();
-    runtime.block_on(chat).unwrap();
+    chat.await.unwrap();
 }

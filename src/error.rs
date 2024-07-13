@@ -19,15 +19,7 @@ impl fmt::Display for Error {
     }
 }
 
-impl ::std::error::Error for Error {
-    fn description(&self) -> &str {
-        match *self {
-            Error::WebSocket(ref err) => err.description(),
-            Error::Parse(ref err) => err.description(),
-            Error::Channel => "Error sending message through channel.",
-        }
-    }
-}
+impl std::error::Error for Error {}
 
 impl From<server::ParseError> for Error {
     fn from(error: server::ParseError) -> Self {

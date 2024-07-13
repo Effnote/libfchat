@@ -1,3 +1,5 @@
+use tokio_tungstenite::tungstenite::http::{uri::InvalidUri, Uri};
+
 /// Which F-chat server will be connected to.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Server {
@@ -6,14 +8,10 @@ pub enum Server {
 }
 
 impl Server {
-    pub fn url(&self) -> Result<url::Url, url::ParseError> {
-        let string = {
-            use self::Server::*;
-            match *self {
-                Normal => "wss://chat.f-list.net/chat2",
-                Other(ref string) => string,
-            }
-        };
-        url::Url::parse(string)
+    pub fn uri(&self) -> Result<Uri, InvalidUri> {
+        match *self {
+            Server::Normal => "wss://chat.f-list.net/chat2".parse(),
+            Server::Other(ref string) => string.parse(),
+        }
     }
 }
