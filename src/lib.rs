@@ -5,7 +5,6 @@ pub use crate::connection::Connection;
 pub use crate::error::Error;
 pub use crate::server::Server;
 pub use crate::ticket::Ticket;
-pub use futures;
 
 pub mod bbcode;
 pub mod connection;

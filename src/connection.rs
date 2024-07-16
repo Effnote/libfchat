@@ -1,7 +1,9 @@
-use futures::prelude::*;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
+use futures_core::Stream;
+use futures_sink::Sink;
+use futures_util::SinkExt;
 use tokio::net::TcpStream;
 use tokio_tungstenite::{
     self as async_ws, tungstenite::Message as WsMessage, MaybeTlsStream, WebSocketStream,

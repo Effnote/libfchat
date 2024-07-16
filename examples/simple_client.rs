@@ -1,7 +1,7 @@
 use std::io;
 use std::io::prelude::*;
 
-use fchat::futures::prelude::*;
+use futures_util::StreamExt;
 
 fn read_line() -> io::Result<String> {
     io::stdout().flush()?;
