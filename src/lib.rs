@@ -3,6 +3,7 @@ extern crate serde_derive;
 
 pub use crate::connection::Connection;
 pub use crate::error::Error;
+pub use crate::message::{ClientMessage, ServerMessage};
 pub use crate::server::Server;
 pub use crate::ticket::Ticket;
 
