@@ -32,7 +32,10 @@ impl From<serde_json::Error> for Error {
 pub struct Ticket {
     pub username: String,
     pub characters: Vec<String>,
+    pub default_character: Option<String>,
     pub ticket: String,
+    pub friends: Vec<Friend>,
+    pub bookmarks: Vec<Bookmark>,
     pub json: serde_json::Value,
 }
 
@@ -66,6 +69,12 @@ impl Ticket {
             )));
         };
 
+        let default_character: Option<String> = json_response
+            .get("default_character")
+            .cloned()
+            .map(serde_json::from_value)
+            .transpose()?;
+
         let ticket = if let Some(ticket) = json_response.get("ticket").and_then(|x| x.as_str()) {
             String::from(ticket)
         } else {
@@ -74,10 +83,26 @@ impl Ticket {
             )));
         };
 
+        let friends: Vec<Friend> = json_response
+            .get("friends")
+            .cloned()
+            .map(serde_json::from_value)
+            .transpose()?
+            .unwrap_or(vec![]);
+        let bookmarks: Vec<Bookmark> = json_response
+            .get("bookmarks")
+            .cloned()
+            .map(serde_json::from_value)
+            .transpose()?
+            .unwrap_or(vec![]);
+
         Ok(Ticket {
             username: String::from(username),
             characters,
+            default_character,
             ticket,
+            friends,
+            bookmarks,
             json: json_response,
         })
     }
@@ -89,4 +114,15 @@ impl Ticket {
     pub fn ticket(&self) -> String {
         self.ticket.clone()
     }
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Friend {
+    dest_name: String,
+    source_name: String,
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Bookmark {
+    name: String,
 }

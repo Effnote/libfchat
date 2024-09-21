@@ -29,6 +29,9 @@ async fn main() {
     print!("Password: ");
     let password = read_line().unwrap();
     let ticket = fchat::Ticket::request(&username, &password).await.unwrap();
+    println!("Friends: {:?}", ticket.friends);
+    println!("Bookmarks: {:?}", ticket.bookmarks);
+    println!("Default character: {:?}", ticket.default_character);
     let characters = ticket.characters();
     println!("Characters:");
     for (i, character) in characters.iter().enumerate() {
